@@ -578,6 +578,16 @@ export const calculateOverallRisk = async (req, res) => {
       }
     }
 
+    const explainableFactors = Object.entries(scores)
+      .filter(([key, value]) => value !== null && value !== undefined && weights[key] !== undefined)
+      .map(([key, value]) => ({
+        factor: key,
+        raw_score: parseFloat(Number(value).toFixed(4)),
+        weight: parseFloat(Number(weights[key]).toFixed(4)),
+        weighted_contribution: parseFloat(Number(value * weights[key]).toFixed(4)),
+      }))
+      .sort((a, b) => b.weighted_contribution - a.weighted_contribution);
+
     const response = {
       daily: {
         score: parseFloat((overallScore * 100).toFixed(2)),
@@ -598,6 +608,11 @@ export const calculateOverallRisk = async (req, res) => {
         above_personal_baseline: isAbovePersonalBaseline,
         consecutive_high_risk_days: consecutiveHighRiskDays,
         early_intervention_needed: alerts.some((a) => a.severity === "high" || a.severity === "critical"),
+      },
+      explainability: {
+        scoring_method: "normalized_weighted_average",
+        factors: explainableFactors,
+        top_driver: explainableFactors[0]?.factor || null,
       },
       emergency_notification: autoEmergencyNotification,
     };

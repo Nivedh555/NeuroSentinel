@@ -227,6 +227,8 @@ export default function DiagnosisPage() {
     temperature: '',
     spO2: ''
   });
+  const [bpSystolic, setBpSystolic] = useState('');
+  const [bpDiastolic, setBpDiastolic] = useState('');
 
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [medicalHistory, setMedicalHistory] = useState('');
@@ -287,8 +289,27 @@ export default function DiagnosisPage() {
     return emergencyKeywords.some(keyword => lowerText.includes(keyword));
   };
 
-  // Check if all vitals are filled
-  const allVitalsFilled = vitals.heartRate && vitals.bloodPressure && vitals.temperature && vitals.spO2;
+  const isWithinRange = (value, min, max) => {
+    const num = parseFloat(value);
+    return !Number.isNaN(num) && num >= min && num <= max;
+  };
+
+  const systolic = parseFloat(bpSystolic);
+  const diastolic = parseFloat(bpDiastolic);
+
+  const vitalsValidation = {
+    heartRate: isWithinRange(vitals.heartRate, 30, 220),
+    bloodPressure:
+      !Number.isNaN(systolic) &&
+      !Number.isNaN(diastolic) &&
+      systolic > diastolic &&
+      isWithinRange(bpSystolic, 70, 250) &&
+      isWithinRange(bpDiastolic, 40, 150),
+    temperature: isWithinRange(vitals.temperature, 90, 110),
+    spO2: isWithinRange(vitals.spO2, 50, 100),
+  };
+
+  const allVitalsValid = Object.values(vitalsValidation).every(Boolean);
 
 
 
@@ -301,8 +322,8 @@ export default function DiagnosisPage() {
   };
 
   const handleRunDiagnosis = async () => {
-    if (!vitals.heartRate || !vitals.bloodPressure || !vitals.temperature || !vitals.spO2) {
-      setError('Please fill in all vitals');
+    if (!allVitalsValid) {
+      setError('Please enter valid vitals in the suggested ranges before analyzing.');
       return;
     }
     
@@ -423,12 +444,17 @@ export default function DiagnosisPage() {
                 Heart Rate (BPM)
               </label>
               <input
-                type="text"
+                type="number"
                 value={vitals.heartRate}
                 onChange={(e) => setVitals({...vitals, heartRate: e.target.value})}
+                min="30"
+                max="220"
                 placeholder="e.g., 72"
                 className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
               />
+              <p className={`mt-2 text-xs ${vitals.heartRate && !vitalsValidation.heartRate ? 'text-red-600' : 'text-gray-500'}`}>
+                Expected range: 30-220 BPM
+              </p>
             </div>
 
             {/* Blood Pressure */}
@@ -437,13 +463,40 @@ export default function DiagnosisPage() {
                 <Droplets size={20} className="text-blue-500" />
                 Blood Pressure
               </label>
-              <input
-                type="text"
-                value={vitals.bloodPressure}
-                onChange={(e) => setVitals({...vitals, bloodPressure: e.target.value})}
-                placeholder="e.g., 120/80"
-                className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
-              />
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                <input
+                  type="number"
+                  value={bpSystolic}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setBpSystolic(value);
+                    const nextBloodPressure = value && bpDiastolic ? `${value}/${bpDiastolic}` : '';
+                    setVitals({ ...vitals, bloodPressure: nextBloodPressure });
+                  }}
+                  min="70"
+                  max="250"
+                  placeholder="Systolic"
+                  className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
+                />
+                <span className="text-gray-500 font-bold">/</span>
+                <input
+                  type="number"
+                  value={bpDiastolic}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setBpDiastolic(value);
+                    const nextBloodPressure = bpSystolic && value ? `${bpSystolic}/${value}` : '';
+                    setVitals({ ...vitals, bloodPressure: nextBloodPressure });
+                  }}
+                  min="40"
+                  max="150"
+                  placeholder="Diastolic"
+                  className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
+                />
+              </div>
+              <p className={`mt-2 text-xs ${(bpSystolic || bpDiastolic) && !vitalsValidation.bloodPressure ? 'text-red-600' : 'text-gray-500'}`}>
+                Enter as systolic/diastolic. Systolic must be higher.
+              </p>
             </div>
 
             {/* Temperature */}
@@ -453,12 +506,18 @@ export default function DiagnosisPage() {
                 Temperature (°F)
               </label>
               <input
-                type="text"
+                type="number"
                 value={vitals.temperature}
                 onChange={(e) => setVitals({...vitals, temperature: e.target.value})}
+                min="90"
+                max="110"
+                step="0.1"
                 placeholder="e.g., 98.6"
                 className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
               />
+              <p className={`mt-2 text-xs ${vitals.temperature && !vitalsValidation.temperature ? 'text-red-600' : 'text-gray-500'}`}>
+                Expected range: 90.0-110.0 °F
+              </p>
             </div>
 
             {/* SpO2 */}
@@ -468,37 +527,40 @@ export default function DiagnosisPage() {
                 SpO₂ (Oxygen %)
               </label>
               <input
-                type="text"
+                type="number"
                 value={vitals.spO2}
                 onChange={(e) => setVitals({...vitals, spO2: e.target.value})}
+                min="50"
+                max="100"
                 placeholder="e.g., 98"
                 className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-900 placeholder-gray-400"
               />
+              <p className={`mt-2 text-xs ${vitals.spO2 && !vitalsValidation.spO2 ? 'text-red-600' : 'text-gray-500'}`}>
+                Expected range: 50-100%
+              </p>
             </div>
           </div>
         </div>
 
         {/* Manual Diagnosis Button */}
-        {allVitalsFilled && (
-          <div className="mb-8 flex justify-center">
-            <button
-              onClick={handleRunDiagnosis}
-              disabled={loading}
-              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-green-300 disabled:to-emerald-400 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-3 transform hover:scale-105 active:scale-95 text-lg w-full md:w-auto justify-center"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={24} className="animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  🧠 Analyze My Vitals & Symptoms →
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        <div className="mb-8 flex justify-center">
+          <button
+            onClick={handleRunDiagnosis}
+            disabled={loading || !allVitalsValid}
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-green-300 disabled:to-emerald-400 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-3 transform hover:scale-105 active:scale-95 text-lg w-full md:w-auto justify-center"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={24} className="animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                🧠 Analyze My Vitals & Symptoms →
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Section 2: Select Symptoms */}
         <div className="mb-8">

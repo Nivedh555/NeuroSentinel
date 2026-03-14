@@ -11,7 +11,9 @@ export default function DoctorDashboard() {
     totalToday: 0,
     emergencies: 0,
     pending: 0,
-    completed: 0
+    completed: 0,
+    topLoadedDoctor: 'N/A',
+    recommendedDoctor: 'N/A'
   });
   const navigate = useNavigate();
   const isAdminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
@@ -38,12 +40,30 @@ export default function DoctorDashboard() {
       const appointmentsToday = response.data.appointments?.filter(
         a => new Date(a.date).toDateString() === today
       ) || [];
+
+      const activeAppointments = (response.data.appointments || []).filter(
+        a => a.status === 'Pending' || a.status === 'Confirmed'
+      );
+
+      const doctorLoadMap = activeAppointments.reduce((acc, apt) => {
+        const key = apt.doctorName || 'Unassigned';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const doctorLoads = Object.entries(doctorLoadMap).sort((a, b) => b[1] - a[1]);
+      const topLoadedDoctor = doctorLoads[0]?.[0] || 'N/A';
+      const recommendedDoctor = doctorLoads.length > 0
+        ? [...doctorLoads].sort((a, b) => a[1] - b[1])[0][0]
+        : 'N/A';
       
       setStats({
         totalToday: appointmentsToday.length,
         emergencies: response.data.appointments?.filter(a => a.triageLevel === 'EMERGENCY').length || 0,
         pending: response.data.appointments?.filter(a => a.status === 'Pending').length || 0,
-        completed: response.data.appointments?.filter(a => a.status === 'Completed').length || 0
+        completed: response.data.appointments?.filter(a => a.status === 'Completed').length || 0,
+        topLoadedDoctor,
+        recommendedDoctor
       });
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
@@ -65,9 +85,15 @@ export default function DoctorDashboard() {
     return 'text-green-600 font-bold';
   };
 
+  const triagePriority = { EMERGENCY: 3, URGENT: 2, ROUTINE: 1 };
+
   const filteredAppointments = appointments.filter(apt => {
     if (selectedFilter === 'All') return true;
     return apt.triageLevel === selectedFilter;
+  }).sort((a, b) => {
+    const triageDiff = (triagePriority[b.triageLevel] || 0) - (triagePriority[a.triageLevel] || 0);
+    if (triageDiff !== 0) return triageDiff;
+    return new Date(a.createdAt || a.date) - new Date(b.createdAt || b.date);
   });
 
   const updateStatus = async (appointmentId, newStatus) => {
@@ -174,6 +200,14 @@ export default function DoctorDashboard() {
               {filter}
             </button>
           ))}
+        </div>
+
+        {/* Workflow Optimization Summary */}
+        <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+          <h3 className="text-base font-bold text-blue-900 mb-2">Workflow Optimization</h3>
+          <p className="text-sm text-blue-800">Highest current doctor load: <span className="font-semibold">{stats.topLoadedDoctor}</span></p>
+          <p className="text-sm text-blue-800">Suggested next allocation: <span className="font-semibold">{stats.recommendedDoctor}</span></p>
+          <p className="text-xs text-blue-700 mt-1">Queue is auto-prioritized by triage level and waiting order.</p>
         </div>
 
         {/* Patient Queue Table */}

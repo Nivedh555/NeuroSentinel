@@ -15,6 +15,7 @@ const userAuth = async(req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if(decoded.id){
             req.userId = decoded.id;
+            req.user = { id: decoded.id };
         }else{
             if(req.path == '/is-authenticated'){
                 return next();

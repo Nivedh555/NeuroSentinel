@@ -1,9 +1,20 @@
 import Appointment from '../models/Appointment.js';
+import User from '../models/User.js';
+
+const assertAdmin = async (userId) => {
+  if (!userId) return false;
+  const user = await User.findById(userId).select('admin');
+  return !!user?.admin;
+};
 
 export const bookAppointment = async (req, res) => {
   try {
     const { doctorName, specialty, date, time, patientName, patientSymptoms, riskScore } = req.body;
-    const userId = req.user?.id || null; // Optional - if user is logged in
+    const userId = req.user?.id || req.userId || null;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     if (!doctorName || !specialty || !date || !time || !patientName) {
       return res.status(400).json({ message: 'Missing required fields: doctorName, specialty, date, time, patientName' });
@@ -42,6 +53,11 @@ export const bookAppointment = async (req, res) => {
 
 export const getAppointments = async (req, res) => {
   try {
+    const isAdmin = await assertAdmin(req.userId);
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: admin access required' });
+    }
+
     const appointments = await Appointment.find({}).sort({ date: -1 });
     res.status(200).json({ appointments });
   } catch (error) {
@@ -68,6 +84,11 @@ export const getUserAppointments = async (req, res) => {
 
 export const updateAppointmentStatus = async (req, res) => {
   try {
+    const isAdmin = await assertAdmin(req.userId);
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: admin access required' });
+    }
+
     const { appointmentId } = req.params;
     const { status } = req.body;
 

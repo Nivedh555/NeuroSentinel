@@ -61,13 +61,30 @@ Please analyze these vitals and symptoms and provide your professional assessmen
 
     // Check if emergency care is mentioned
     const emergencyKeywords = ['emergency', 'hospital', 'call 911', '911', 'critical', 'severe'];
-    const needsEmergency = emergencyKeywords.some(keyword => 
+    const matchedEmergencyKeywords = emergencyKeywords.filter(keyword =>
       analysisText.toLowerCase().includes(keyword)
     );
+    const needsEmergency = matchedEmergencyKeywords.length > 0;
+
+    const explainability = {
+      input_summary: {
+        vitals,
+        symptoms_count: Array.isArray(symptoms) ? symptoms.length : 0,
+        has_medical_history: !!medicalHistory,
+      },
+      decision_trace: [
+        'Validated required vitals (heart rate, blood pressure, temperature, SpO2).',
+        'Generated AI assessment from symptom-vitals context.',
+        'Scanned response for emergency intent keywords to derive emergency flag.',
+      ],
+      emergency_keywords_matched: matchedEmergencyKeywords,
+      triage_hint: needsEmergency ? 'EMERGENCY' : 'ROUTINE',
+    };
 
     return res.status(200).json({
       analysis: analysisText,
       emergency: needsEmergency ? 'Seek immediate emergency medical care.' : null,
+      explainability,
       timestamp: new Date().toISOString()
     });
 

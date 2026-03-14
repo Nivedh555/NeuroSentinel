@@ -219,3 +219,15 @@ NeuroSentinel uses camera access in specific user-facing workflows that include 
     - The app uses detected emotion labels for in-app guidance (for example, mismatch banners).
     - Raw webcam video frames are not uploaded by the emotion detector component.
 
+## Requirements Coverage
+
+| Requirement | Status | Implementation Evidence |
+| :--- | :--- | :--- |
+| AI Diagnostic Module | Implemented | Vitals/symptoms analysis + emergency hinting via diagnosis APIs and UI flow. |
+| Predictive Analytics Engine | Implemented | Daily risk scoring, trend detection, and XGBoost-based forecasting endpoints. |
+| Remote Care Module | Implemented | Remote symptom/vitals collection, chatbot, journaling, and appointment booking. |
+| Privacy and Security Layer | Implemented | JWT auth middleware + AES-256-GCM encrypted sensitive text storage. |
+| Workflow Automation Dashboard | Implemented | Doctor/admin triage dashboard with prioritized queue and load-aware allocation suggestion. |
+| Explainable AI Output | Implemented | Risk and diagnosis responses include explainability fields and top drivers. |
+| End-to-end Prototype | Implemented | Patient intake -> AI risk/diagnosis -> triage -> appointment -> provider dashboard workflow. |
+

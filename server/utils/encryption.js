@@ -7,8 +7,7 @@ const AUTH_TAG_LENGTH = 16;
 function getKey() {
   const key = process.env.JOURNAL_ENCRYPTION_KEY;
   if (!key || key.length !== 64) {
-    console.warn("WARNING: JOURNAL_ENCRYPTION_KEY is missing or invalid. Using a fallback key for development. THIS IS NOT SECURE FOR PRODUCTION.");
-    return Buffer.from("d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4", "hex");
+    throw new Error("JOURNAL_ENCRYPTION_KEY must be set to a valid 64-char hex string");
   }
   return Buffer.from(key, "hex");
 }
