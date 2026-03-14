@@ -27,6 +27,8 @@ const Login = () => {
     try {
       await loginUser(email, password);
       toast.success("Login successful");
+      localStorage.setItem('appRole', 'user');
+      localStorage.setItem('roleChoiceDone', 'true');
       await getAuthStatus();
       navigate("/");
     } catch (error) {

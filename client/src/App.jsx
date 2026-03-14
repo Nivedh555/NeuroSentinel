@@ -1,6 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from './context/AuthContext';
 import SurveyBanner from './components/SurveyBanner';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -15,6 +13,8 @@ import ResetPassword from './components/auth/ResetPassword';
 import VerifyAccount from './components/auth/VerifyAccount';
 import Insights from './pages/Insights';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
+import UserOnlyRoute from './components/auth/UserOnlyRoute';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
@@ -26,9 +26,9 @@ import SleepQuiz from './components/quiz/SleepQuiz';
 import StressQuiz from './components/quiz/StressQuiz';
 import DailyQuiz from './components/quiz/DailyQuiz';
 import Helplines from './pages/Helplines';
-import CommunityExplore from './pages/CommunityExplore';
-import CommunityLanding from './pages/CommunityLanding';
-import CommunityPage from './pages/CommunityPage';
+import DiagnosisPage from './pages/DiagnosisPage';
+import DoctorDashboard from './pages/DoctorDashboard';
+import DoctorLogin from './pages/DoctorLogin';
 import NotFound from './pages/NotFound';
 import RateLimited from './pages/RateLimited';
 import Survey from './pages/Survey';
@@ -43,12 +43,14 @@ function App() {
       <NavigationSetter />
       <Routes>
 
-        <Route element={<AuthLayout><Login /></AuthLayout>} path="/login" />
-        <Route element={<AuthLayout><Signup /></AuthLayout>} path="/signup" />
-        <Route element={<AuthLayout><ForgotPassword /></AuthLayout>} path="/forgot-password" />
-        <Route element={<AuthLayout><ResetPassword /></AuthLayout>} path="/reset-password" />
-        <Route path="/survey" element={<ProtectedRoute><Survey /></ProtectedRoute>} />
+        <Route element={<UserOnlyRoute><AuthLayout><Login /></AuthLayout></UserOnlyRoute>} path="/login" />
+        <Route element={<UserOnlyRoute><AuthLayout><Signup /></AuthLayout></UserOnlyRoute>} path="/signup" />
+        <Route element={<UserOnlyRoute><AuthLayout><ForgotPassword /></AuthLayout></UserOnlyRoute>} path="/forgot-password" />
+        <Route element={<UserOnlyRoute><AuthLayout><ResetPassword /></AuthLayout></UserOnlyRoute>} path="/reset-password" />
+        <Route path="/survey" element={<UserOnlyRoute><ProtectedRoute><Survey /></ProtectedRoute></UserOnlyRoute>} />
         <Route path="/rate-limited" element={<RateLimited />} />
+        <Route path="/doctor-login" element={<AdminRoute allowWithoutAdminSession={true}><DoctorLogin /></AdminRoute>} />
+        <Route path="/doctor-dashboard" element={<AdminRoute><DoctorDashboard /></AdminRoute>} />
 
         <Route
           element={
@@ -59,25 +61,24 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/chatbot" element={<ProtectedRoute><BotDashboard /></ProtectedRoute>}>
-                    <Route path=":id" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                    <Route path="new" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                  <Route path="/chatbot" element={<UserOnlyRoute><ProtectedRoute><BotDashboard /></ProtectedRoute></UserOnlyRoute>}>
+                    <Route path=":id" element={<UserOnlyRoute><ProtectedRoute><ChatPage /></ProtectedRoute></UserOnlyRoute>} />
+                    <Route path="new" element={<UserOnlyRoute><ProtectedRoute><ChatPage /></ProtectedRoute></UserOnlyRoute>} />
                   </Route>
-                  <Route path="/communities" element={<ProtectedRoute><CommunityLanding /></ProtectedRoute>} />
-                  <Route path="/communities/explore" element={<ProtectedRoute><CommunityExplore /></ProtectedRoute>} />
-                  <Route path="/communities/:communityId" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
-                  <Route path="/daily-quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
-                  <Route path="/journal" element={<ProtectedRoute><Journal /></ProtectedRoute>} />
-                  <Route path="/helplines" element={<ProtectedRoute><Helplines /></ProtectedRoute>} />
+
+                  <Route path="/daily-quiz" element={<UserOnlyRoute><ProtectedRoute><DailyQuiz /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/journal" element={<UserOnlyRoute><ProtectedRoute><Journal /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/helplines" element={<UserOnlyRoute><ProtectedRoute><Helplines /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/diagnosis" element={<UserOnlyRoute><ProtectedRoute><DiagnosisPage /></ProtectedRoute></UserOnlyRoute>} />
                   <Route path="/insights" element={<Insights />} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-                  <Route path="/verify-account" element={<ProtectedRoute><VerifyAccount /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  <Route path="/anxiety-quiz" element={<ProtectedRoute><AnxietyQuiz /></ProtectedRoute>} />
-                  <Route path="/depression-quiz" element={<ProtectedRoute><DepressionQuiz /></ProtectedRoute>} />
-                  <Route path="/sleep-quiz" element={<ProtectedRoute><SleepQuiz /></ProtectedRoute>} />
-                  <Route path="/stress-quiz" element={<ProtectedRoute><StressQuiz /></ProtectedRoute>} />
+                  <Route path="/profile" element={<UserOnlyRoute><ProtectedRoute><Profile /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/profile/edit" element={<UserOnlyRoute><ProtectedRoute><EditProfile /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/verify-account" element={<UserOnlyRoute><ProtectedRoute><VerifyAccount /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/settings" element={<UserOnlyRoute><ProtectedRoute><Settings /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/anxiety-quiz" element={<UserOnlyRoute><ProtectedRoute><AnxietyQuiz /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/depression-quiz" element={<UserOnlyRoute><ProtectedRoute><DepressionQuiz /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/sleep-quiz" element={<UserOnlyRoute><ProtectedRoute><SleepQuiz /></ProtectedRoute></UserOnlyRoute>} />
+                  <Route path="/stress-quiz" element={<UserOnlyRoute><ProtectedRoute><StressQuiz /></ProtectedRoute></UserOnlyRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

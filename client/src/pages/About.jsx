@@ -182,14 +182,14 @@ const About = () => {
                             <div className="w-12 h-12 rounded-full bg-[#E1F5FE] text-[#0277 BD] flex items-center justify-center font-bold">1</div>
                             <h3 className="text-2xl font-bold text-[#3E2723]">Head Office</h3>
                             <div className="space-y-3 text-lg text-[#5D4037] font-medium opacity-80">
-                                <p>Wellesly Road,Shivajinagar</p>
-                                <p>Pune, Maharashtra 411001</p>
+                                <p>KandalKoya Road,Medchal</p>
+                                <p>Hyderabad, Telangana 501401</p>
                                 <div className="pt-4 space-y-2">
                                     <p className="hover:text-[#EF6C00] transition-colors cursor-pointer flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#EF6C00]"></span> hello@neurosentinel.com
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#EF6C00]"></span> 247r1a66h4@cmrtc.ac.in
                                     </p>
                                     <p className="hover:text-[#EF6C00] transition-colors cursor-pointer flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#EF6C00]"></span> +91 9763718180
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#EF6C00]"></span> +91 9948171448
                                     </p>
                                 </div>
                             </div>
@@ -200,14 +200,14 @@ const About = () => {
                             <div className="w-12 h-12 rounded-full bg-[#F3E5F5] text-[#8E24AA] flex items-center justify-center font-bold">2</div>
                             <h3 className="text-2xl font-bold text-[#3E2723]">Secondary Office</h3>
                             <div className="space-y-3 text-lg text-[#5D4037] font-medium opacity-80">
-                                <p>Wellesly Road,Shivajinagar</p>
-                                <p>Pune, Maharashtra 411001</p>
+                                <p>Banjara Hills, Road No:4</p>
+                                <p>Hyderabad, Telangana 500034</p>
                                 <div className="pt-4 space-y-2">
                                     <p className="hover:text-[#8E24AA] transition-colors cursor-pointer flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]"></span> wellness@neurosentinel.com
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]"></span> 247r1a66h1@cmrtc.ac.in
                                     </p>
                                     <p className="hover:text-[#8E24AA] transition-colors cursor-pointer flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]"></span> +91 9763718186
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]"></span> +91 8247878254
                                     </p>
                                 </div>
                             </div>

@@ -14,6 +14,7 @@ const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [quizHover, setQuizHover] = useState(false);
     const quizTimeoutRef = useRef(null);
+    const isAdminRole = localStorage.getItem('appRole') === 'admin';
 
     const handleQuizEnter = () => {
         if (quizTimeoutRef.current) clearTimeout(quizTimeoutRef.current);
@@ -143,7 +144,6 @@ const Navbar = () => {
                     </div>
 
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><Link to="/communities">Community Chat</Link></li>
                         <li>
                             <details>
                                 <summary className="list-none before:hidden after:hidden marker:hidden cursor-pointer">Quiz</summary>
@@ -159,7 +159,9 @@ const Navbar = () => {
                             </details>
                         </li>
                         <li><Link to="/journal">Journal</Link></li>
+                        <li><Link to="/diagnosis">Diagnosis</Link></li>
                         <li><Link to="/insights">Insights</Link></li>
+                        {isAdminRole && <li><Link to="/doctor-dashboard">Doctor Portal</Link></li>}
                         <li><Link to="/about">About Us</Link></li>
                         <li><Link to="/chatbot">SyncAI</Link></li>
                         <li><Link to="/helplines">Helplines</Link></li>
@@ -187,8 +189,6 @@ const Navbar = () => {
                         : "text-white hover:text-bloom-primary"
                         }`}
                 >
-                    <li><Link to="/communities">Community Chat</Link></li>
-
                     {/* Desktop Quiz — hover dropdown */}
                     <li
                         className="relative"
@@ -225,7 +225,9 @@ const Navbar = () => {
                     </li>
 
                     <li><Link to="/journal">Journal</Link></li>
+                    <li><Link to="/diagnosis">Diagnosis</Link></li>
                     <li><Link to="/insights">Insights</Link></li>
+                    {isAdminRole && <li><Link to="/doctor-dashboard">Doctor Portal</Link></li>}
                     <li><Link to="/about">About Us</Link></li>
                     <li><Link to="/chatbot">SyncAI</Link></li>
                     <li><Link to="/helplines">Helplines</Link></li>

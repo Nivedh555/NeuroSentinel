@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import {
   BookOpen,
   MessageCircle,
@@ -21,7 +22,25 @@ import {
 export default function Home() {
   const [activeTab, setActiveTab] = useState('journal');
   const [journalEntry, setJournalEntry] = useState('');
+  const { user, isLoggedIn } = useContext(AuthContext);
   const [scrollY, setScrollY] = useState(0);
+  const [roleChoiceDone, setRoleChoiceDone] = useState(() => localStorage.getItem('roleChoiceDone') === 'true');
+  const heroRef = useRef(null);
+  const navigate = useNavigate();
+
+  const chooseAdminRole = () => {
+    localStorage.setItem('appRole', 'admin');
+    localStorage.setItem('roleChoiceDone', 'true');
+    setRoleChoiceDone(true);
+    navigate('/doctor-login');
+  };
+
+  const chooseUserRole = () => {
+    localStorage.setItem('appRole', 'user');
+    localStorage.setItem('roleChoiceDone', 'true');
+    setRoleChoiceDone(true);
+    navigate(isLoggedIn ? '/diagnosis' : '/login');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,8 +120,43 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Role Selection Section */}
+      {!roleChoiceDone && <div className="relative z-10 w-full px-4 pt-10">
+        <div className="max-w-6xl mx-auto flex flex-col gap-6">
+          <div className="text-center">
+            <p className="text-sm uppercase tracking-[0.5em] text-purple-500 font-bold">NeuroSentinel</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">AI-Powered Healthcare — For Patients & Providers</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div
+              onClick={chooseAdminRole}
+              className="group cursor-pointer rounded-[2rem] bg-gradient-to-br from-[#0e112a] to-[#431d7f] p-8 text-white shadow-2xl transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_25px_45px_-15px_rgba(19,7,39,0.8)]"
+            >
+              <h3 className="text-3xl font-bold mb-2">👨‍⚕️ I'm a Doctor / Admin</h3>
+              <p className="text-sm text-purple-100 mb-6">Access hospital dashboard, manage patients & appointments</p>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-base font-semibold tracking-wide">Enter Admin Portal →</span>
+                <span className="inline-flex items-center justify-center rounded-full border border-white/40 px-4 py-2 text-sm font-bold">
+                  Go
+                </span>
+              </div>
+            </div>
+            <div className="group rounded-[2rem] border border-purple-200 bg-white/80 p-8 shadow-xl transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1">
+              <h3 className="text-3xl font-bold text-slate-900 mb-2">🧑‍💊 I'm a Patient</h3>
+              <p className="text-sm text-slate-700 mb-6">Check symptoms, get AI diagnosis and book appointments</p>
+              <button
+                onClick={chooseUserRole}
+                className="inline-flex items-center gap-2 rounded-full border border-purple-400 px-5 py-3 text-sm font-semibold text-purple-700 transition-all hover:bg-purple-50"
+              >
+                Get Started →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>}
+
       {/* Hero Section */}
-      <div className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-4 text-center">
+      <div className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-4 text-center" ref={heroRef}>
         <div className="max-w-4xl mx-auto space-y-8 mt-20 md:mt-0">
 
           <h1 className="text-5xl md:text-7xl font-bold font-serif text-[#3E2723] leading-[1.1] tracking-tight">
@@ -117,12 +171,16 @@ export default function Home() {
             Science-backed, user-friendly, and always here for you.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5 items-center justify-center pt-8">
-            <Link to="/signup" className="btn btn-lg h-16 px-12 rounded-full bg-[#EF6C00] hover:bg-[#E65100] text-white border-none text-xl shadow-[#FFCCBC] shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center gap-2">
-              Get Started Free <ArrowRight className="w-6 h-6" />
-            </Link>
-          </div>
-          <p className="text-sm text-[#8D6E63] font-medium">No credit card required • Free forever plan available</p>
+          {!user && (
+            <>
+              <div className="flex flex-col sm:flex-row gap-5 items-center justify-center pt-8">
+                <Link to="/signup" className="btn btn-lg h-16 px-12 rounded-full bg-[#EF6C00] hover:bg-[#E65100] text-white border-none text-xl shadow-[#FFCCBC] shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center gap-2">
+                  Get Started Free <ArrowRight className="w-6 h-6" />
+                </Link>
+              </div>
+              <p className="text-sm text-[#8D6E63] font-medium">No credit card required • Free forever plan available</p>
+            </>
+          )}
         </div>
       </div>
 

@@ -64,9 +64,14 @@ const register = async (req, res) => {
             subject,
             text
         }
-        transporter.sendMail(mailOptions).catch(error => {
-            console.error("Error sending mail", error)
-        });
+        
+        // Send welcome email but don't block registration if it fails
+        try {
+            transporter.sendMail(mailOptions);
+        } catch (emailError) {
+            console.error("Warning: Error sending welcome email", emailError);
+            // Continue with registration even if email fails
+        }
 
         // Cache the new user
         await setCache(cacheKeys.user(user._id), {
