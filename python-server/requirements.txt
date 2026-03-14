@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+textblob
+pydantic
+google-genai
+python-dotenv
+groq
+protobuf
+sentencepiece
+transformers
+torch
+xgboost
