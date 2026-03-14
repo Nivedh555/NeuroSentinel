@@ -219,10 +219,3 @@ NeuroSentinel uses camera access in specific user-facing workflows that include 
     - The app uses detected emotion labels for in-app guidance (for example, mismatch banners).
     - Raw webcam video frames are not uploaded by the emotion detector component.
 
-## Hackathon Judging Alignment
-
-- Innovation: Multi-modal AI + predictive risk + automated escalation.
-- Impact: Early detection and faster intervention pipeline.
-- Technical depth: Full-stack microservice-style architecture with ML integration.
-- Feasibility: Dockerized deployment and modular services.
-- UX: Role-based flows, explainable outputs, actionable recommendations.
