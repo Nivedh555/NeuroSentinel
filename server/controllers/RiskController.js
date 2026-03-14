@@ -2,6 +2,7 @@ import { RISK_WEIGHTS, RISK_LABELS } from "../config/riskConfig.js";
 import RiskScore from "../models/RiskScore.js";
 import DailyQuiz from "../models/DailyQuiz.js";
 import { setCache, getCache, cacheKeys } from "../utils/cacheUtils.js";
+import { sendEmergencyContactSms } from "../services/emergencyNotificationService.js";
 
 const HELPLINE = {
   page: "/support/helplines",
@@ -506,7 +507,7 @@ export const calculateOverallRisk = async (req, res) => {
     }
 
     // ── Persist ──
-    await RiskScore.findOneAndUpdate(
+    const persistedRisk = await RiskScore.findOneAndUpdate(
       { user: userId, date: today },
       {
         depression_quiz_score: depressionData.score,
@@ -537,6 +538,46 @@ export const calculateOverallRisk = async (req, res) => {
       { upsert: true, new: true }
     );
 
+    // Auto-notify emergency contacts once per day for high-risk mental health states.
+    const shouldAutoNotify = riskLevel === "HIGH" || riskLevel === "CRITICAL";
+    let autoEmergencyNotification = {
+      triggered: false,
+      sent: false,
+    };
+
+    if (shouldAutoNotify && !persistedRisk.emergency_contact_notified) {
+      autoEmergencyNotification.triggered = true;
+      try {
+        const { sentCount } = await sendEmergencyContactSms({
+          userId,
+          messageBody:
+            "NeuroSentinel alert: We detected a high mental health risk pattern. Please check in with your contact and offer immediate support.",
+        });
+
+        autoEmergencyNotification.sent = sentCount > 0;
+        autoEmergencyNotification.sent_count = sentCount;
+
+        await RiskScore.findOneAndUpdate(
+          { user: userId, date: today },
+          {
+            emergency_contact_notified: sentCount > 0,
+            emergency_contact_notified_at: sentCount > 0 ? new Date() : null,
+            emergency_contact_notify_error: sentCount > 0 ? null : "No emergency SMS was delivered.",
+          }
+        );
+      } catch (notifyError) {
+        autoEmergencyNotification.error = notifyError.message;
+        await RiskScore.findOneAndUpdate(
+          { user: userId, date: today },
+          {
+            emergency_contact_notified: false,
+            emergency_contact_notified_at: null,
+            emergency_contact_notify_error: notifyError.message,
+          }
+        );
+      }
+    }
+
     const response = {
       daily: {
         score: parseFloat((overallScore * 100).toFixed(2)),
@@ -558,6 +599,7 @@ export const calculateOverallRisk = async (req, res) => {
         consecutive_high_risk_days: consecutiveHighRiskDays,
         early_intervention_needed: alerts.some((a) => a.severity === "high" || a.severity === "critical"),
       },
+      emergency_notification: autoEmergencyNotification,
     };
 
     await setCache(cacheKey, response, 3600);

@@ -5,7 +5,7 @@ import { logoutUser } from '../lib/authapi';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { IoMdNotificationsOutline } from "react-icons/io";
 import StreakIndicator from './StreakIndicator';
-import logo from "../assets/logo.png"; 
+import BrandLogo from './BrandLogo';
 
 const Navbar = () => {
     const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
@@ -80,9 +80,10 @@ const Navbar = () => {
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
-        await fetch(`/api/reminders/subscribe/${userId}`, {
+        await fetch('/api/reminders/subscribe', {
             method: "POST",
             body: JSON.stringify(subscription),
+            credentials: "include",
             headers: { "Content-Type": "application/json" }
         });
         alert("Notifications enabled! You will get daily quiz reminders.");
@@ -129,7 +130,7 @@ const Navbar = () => {
     return (
         <div
             style={!isScrolled ? { backgroundColor: '#1a1a2e' } : {}}
-            className={`navbar sticky top-0 z-50 transition-all duration-300 ${isScrolled
+            className={`navbar sticky top-0 z-50 transition-all duration-300 min-h-[76px] px-2 md:px-4 ${isScrolled
                 ? 'bg-base-100/70 backdrop-blur-md border-b border-gray-100'
                 : ''
                 }`}
@@ -170,21 +171,16 @@ const Navbar = () => {
 
                 <Link
                     to="/"
-                    className={`btn btn-ghost text-xl font-serif ${isScrolled ? 'text-bloom-primary' : 'text-bloom-primary'}`}
+                    className={`btn btn-ghost !px-2 md:!px-3 h-auto min-h-0 text-xl font-serif ${isScrolled ? 'text-bloom-primary' : 'text-bloom-primary'}`}
                 >
-                    <img
-                        src={logo}
-                        alt="NeuroSentinel Logo"
-                        className="w-8 h-8 object-contain"
-                    />
-                    NeuroSentinel
+                    <BrandLogo size="sm" showWordmark={true} darkText={isScrolled} />
                 </Link>
             </div>
 
             {/* CENTER MENU */}
             <div className="navbar-center hidden lg:flex">
                 <ul
-                    className={`menu menu-horizontal px-1 font-medium whitespace-nowrap flex-nowrap transition-colors duration-300 ${isScrolled
+                    className={`menu menu-horizontal px-1 font-semibold text-[16px] whitespace-nowrap flex-nowrap transition-colors duration-300 tracking-[0.01em] [&>li>a]:px-4 [&>li>a]:py-2.5 [&>li>span]:px-4 [&>li>span]:py-2.5 ${isScrolled
                         ? "text-slate-900 hover:text-bloom-primary"
                         : "text-white hover:text-bloom-primary"
                         }`}

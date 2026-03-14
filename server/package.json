@@ -32,5 +32,14 @@
     "redis-server": "^1.2.2",
     "twilio": "^4.23.0",
     "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15"
+  },
+  "overrides": {
+    "@types/node": "^22.19.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15"
   }
 }

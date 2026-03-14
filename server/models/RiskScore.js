@@ -55,6 +55,11 @@ const riskScoreSchema = new mongoose.Schema({
   // If < 4, velocity_reliable = false in the response
   velocity_data_points: { type: Number, default: 0 },
 
+  // Emergency SMS auto-notification tracking (to avoid repeat sends in one day)
+  emergency_contact_notified: { type: Boolean, default: false },
+  emergency_contact_notified_at: { type: Date, default: null },
+  emergency_contact_notify_error: { type: String, default: null },
+
   created_at: { type: Date, default: Date.now },
 
 }, {

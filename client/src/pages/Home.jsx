@@ -22,6 +22,21 @@ import {
 export default function Home() {
   const [activeTab, setActiveTab] = useState('journal');
   const [journalEntry, setJournalEntry] = useState('');
+  const careQuotes = [
+    {
+      text: 'The good physician treats the disease; the great physician treats the patient who has the disease.',
+      author: 'William Osler'
+    },
+    {
+      text: 'Wherever the art of medicine is loved, there is also a love of humanity.',
+      author: 'Hippocrates'
+    },
+    {
+      text: 'The best way to find yourself is to lose yourself in the service of others.',
+      author: 'Mahatma Gandhi'
+    }
+  ];
+  const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
   const { user, isLoggedIn } = useContext(AuthContext);
   const [scrollY, setScrollY] = useState(0);
   const [roleChoiceDone, setRoleChoiceDone] = useState(() => localStorage.getItem('roleChoiceDone') === 'true');
@@ -50,8 +65,15 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveQuoteIndex((current) => (current + 1) % careQuotes.length);
+    }, 7000);
+    return () => window.clearInterval(interval);
+  }, [careQuotes.length]);
+
   return (
-    <div className="min-h-screen bg-[#F3E5F5] text-slate-800 overflow-x-hidden selection:bg-[#FFCC80] selection:text-[#3E2723] relative font-sans">
+    <div className="min-h-screen bg-[#ECF6F5] text-slate-800 overflow-x-hidden selection:bg-[#CDE9E6] selection:text-[#123C4A] relative font-sans">
 
       <style>
         {`
@@ -124,7 +146,7 @@ export default function Home() {
       {!roleChoiceDone && <div className="relative z-10 w-full px-4 pt-10">
         <div className="max-w-6xl mx-auto flex flex-col gap-6">
           <div className="text-center">
-            <p className="text-sm uppercase tracking-[0.5em] text-purple-500 font-bold">NeuroSentinel</p>
+            <p className="text-sm uppercase tracking-[0.5em] text-[#1F6F8B] font-bold">NeuroSentinel</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">AI-Powered Healthcare — For Patients & Providers</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
@@ -132,8 +154,8 @@ export default function Home() {
               onClick={chooseAdminRole}
               className="group cursor-pointer rounded-[2rem] bg-gradient-to-br from-[#0e112a] to-[#431d7f] p-8 text-white shadow-2xl transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_25px_45px_-15px_rgba(19,7,39,0.8)]"
             >
-              <h3 className="text-3xl font-bold mb-2">👨‍⚕️ I'm a Doctor / Admin</h3>
-              <p className="text-sm text-purple-100 mb-6">Access hospital dashboard, manage patients & appointments</p>
+              <h3 className="text-3xl font-bold mb-2">I'm a Doctor / Admin</h3>
+              <p className="text-sm text-purple-100 mb-6">Access clinical dashboard, monitor risk alerts, and manage appointments</p>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-base font-semibold tracking-wide">Enter Admin Portal →</span>
                 <span className="inline-flex items-center justify-center rounded-full border border-white/40 px-4 py-2 text-sm font-bold">
@@ -142,8 +164,8 @@ export default function Home() {
               </div>
             </div>
             <div className="group rounded-[2rem] border border-purple-200 bg-white/80 p-8 shadow-xl transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1">
-              <h3 className="text-3xl font-bold text-slate-900 mb-2">🧑‍💊 I'm a Patient</h3>
-              <p className="text-sm text-slate-700 mb-6">Check symptoms, get AI diagnosis and book appointments</p>
+              <h3 className="text-3xl font-bold text-slate-900 mb-2">I'm a Patient</h3>
+              <p className="text-sm text-slate-700 mb-6">Check symptoms, receive care guidance, and connect with providers</p>
               <button
                 onClick={chooseUserRole}
                 className="inline-flex items-center gap-2 rounded-full border border-purple-400 px-5 py-3 text-sm font-semibold text-purple-700 transition-all hover:bg-purple-50"
@@ -159,16 +181,13 @@ export default function Home() {
       <div className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-4 text-center" ref={heroRef}>
         <div className="max-w-4xl mx-auto space-y-8 mt-20 md:mt-0">
 
-          <h1 className="text-5xl md:text-7xl font-bold font-serif text-[#3E2723] leading-[1.1] tracking-tight">
-            Find your <span className="text-[#EF6C00]">balance</span>,<br /> one breath at a time.
+          <h1 className="text-5xl md:text-7xl font-bold font-serif text-[#123C4A] leading-[1.1] tracking-tight">
+            Smart care for <span className="text-[#0F9D8A]">everyday health</span>,<br /> from home to hospital.
           </h1>
 
-          <p className="text-xl md:text-2xl text-[#5D4037] max-w-2xl mx-auto font-medium leading-relaxed opacity-80">
-            Tools to help you
-            <span className="text-[#00695C] font-bold mx-1">reflect</span>,
-            <span className="text-[#EF6C00] font-bold mx-1">grow</span>, and
-            <span className="text-[#6A1B9A] font-bold mx-1">thrive</span>.
-            Science-backed, user-friendly, and always here for you.
+          <p className="text-xl md:text-2xl text-[#325A67] max-w-3xl mx-auto font-medium leading-relaxed opacity-90">
+            Early screening, personalized risk insights, and faster doctor coordination in one platform.
+            Built for prevention, continuity, and better outcomes.
           </p>
 
           {!user && (
@@ -186,7 +205,7 @@ export default function Home() {
 
       {/* Feature Tabs Section */}
       <div className="relative z-10 container mx-auto px-4 pb-32 -mt-10">
-        <div className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-8 md:p-14 shadow-xl border border-white/60 max-w-6xl mx-auto">
+        <div className="bg-white/80 backdrop-blur-xl rounded-[3rem] p-8 md:p-16 shadow-xl border border-white/60 max-w-7xl mx-auto">
 
           {/* Tabs */}
           <div className="flex flex-wrap justify-center gap-4 mb-16">
@@ -198,19 +217,19 @@ export default function Home() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 ${activeTab === tab.id
+                className={`flex items-center gap-3 px-10 py-5 rounded-full font-bold text-xl transition-all duration-300 ${activeTab === tab.id
                   ? 'bg-[#3E2723] text-white shadow-lg scale-105'
                   : 'bg-[#F5F5F5] text-[#757575] hover:bg-[#EEEEEE] hover:text-[#424242]'
                   }`}
               >
-                <tab.icon className={`w-5 h-5 ${activeTab !== tab.id ? tab.color : ''}`} />
+                <tab.icon className={`w-6 h-6 ${activeTab !== tab.id ? tab.color : ''}`} />
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
           {/* Tab Content Area */}
-          <div className="min-h-[450px]">
+          <div className="min-h-[560px]">
             {activeTab === 'journal' && (
               <div className="grid md:grid-cols-2 gap-16 items-center animate-fade-in">
                 <div className="space-y-8 text-left order-2 md:order-1">
@@ -237,14 +256,14 @@ export default function Home() {
                 </div>
                 <div className="relative order-1 md:order-2 perspective-[1000px]">
                   <div className="absolute -inset-4 bg-[#B3E5FC] rounded-[2.5rem] transform rotate-6 opacity-40"></div>
-                  <div className="relative bg-white rounded-[2rem] p-8 shadow-2xl border border-[#E1F5FE] transform transition-transform hover:rotate-1">
+                  <div className="relative bg-white rounded-[2rem] p-10 shadow-2xl border border-[#E1F5FE] transform transition-transform hover:rotate-1">
                     <div className="flex gap-2 mb-6 border-b border-gray-100 pb-4">
                       <div className="w-4 h-4 rounded-full bg-[#FFAB91]"></div>
                       <div className="w-4 h-4 rounded-full bg-[#FFCC80]"></div>
                       <div className="w-4 h-4 rounded-full bg-[#A5D6A7]"></div>
                     </div>
                     <textarea
-                      className="w-full h-56 p-4 text-xl text-[#3E2723] placeholder-[#BCAAA4] bg-[#FAFAFA] rounded-xl border-none focus:ring-2 focus:ring-[#B3E5FC] resize-none font-medium leading-relaxed"
+                      className="w-full h-64 p-5 text-xl text-[#3E2723] placeholder-[#BCAAA4] bg-[#FAFAFA] rounded-xl border-none focus:ring-2 focus:ring-[#B3E5FC] resize-none font-medium leading-relaxed"
                       placeholder="Today I am feeling..."
                       value={journalEntry}
                       onChange={(e) => setJournalEntry(e.target.value)}
@@ -262,12 +281,12 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-16 items-center animate-fade-in">
                 <div className="relative order-1">
                   <div className="absolute -inset-4 bg-[#FFE082] rounded-[2.5rem] transform -rotate-3 opacity-40"></div>
-                  <div className="relative bg-white rounded-[2rem] p-10 shadow-2xl border border-[#FFF8E1] text-center">
+                  <div className="relative bg-white rounded-[2rem] p-12 shadow-2xl border border-[#FFF8E1] text-center">
                     <div className="w-28 h-28 mx-auto bg-[#FFF3E0] rounded-full flex items-center justify-center mb-8 shadow-inner">
                       <CloudSun size={48} className="text-[#EF6C00]" />
                     </div>
-                    <h4 className="text-2xl font-bold text-[#3E2723] mb-2">Morning Check-in</h4>
-                    <p className="text-[#8D6E63] mb-8">How are you feeling right now?</p>
+                    <h4 className="text-3xl font-bold text-[#3E2723] mb-2">Morning Check-in</h4>
+                    <p className="text-[#8D6E63] mb-8 text-lg">How are you feeling right now?</p>
 
                     <div className="flex justify-center gap-6 mb-10">
                       {[Frown, Meh, Smile, SmilePlus].map((Icon, i) => (
@@ -361,7 +380,7 @@ export default function Home() {
       {/* Info Cards Section */}
       <div className="container mx-auto px-4 py-20 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif font-bold text-[#3E2723] mb-4">Why choose NeuroSentinel?</h2>
+          <h2 className="text-4xl font-serif font-bold text-[#123C4A] mb-4">Why choose NeuroSentinel?</h2>
           <div className="w-24 h-2 bg-[#FFCC80] rounded-full mx-auto opacity-60"></div>
         </div>
 
@@ -373,10 +392,10 @@ export default function Home() {
               <div className="w-16 h-16 rounded-2xl bg-[#E0F2F1] text-[#00695C] flex items-center justify-center mb-6 shadow-sm">
                 <Brain size={32} />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-[#3E2723] mb-4">Early Intervention</h3>
+              <h3 className="text-3xl font-serif font-bold text-[#123C4A] mb-4">Early Intervention</h3>
               <p className="text-[#5D4037] text-lg leading-relaxed mb-8">
-                Identifying recurring negative thoughts and behavioral patterns early can prevent them from spiraling.
-                Regular self-reflection and tracking can significantly improve long-term mental resilience.
+                Spot risk patterns before they become emergencies.
+                Continuous self-tracking and AI-assisted assessment helps clinicians intervene sooner.
               </p>
               <Link to="/insights" className="text-[#00695C] font-bold text-lg flex items-center gap-2 group-hover:gap-3 transition-all">
                 Take Action<ArrowRight size={20} />
@@ -391,12 +410,13 @@ export default function Home() {
               <div className="w-16 h-16 rounded-2xl bg-[#F3E5F5] text-[#8E24AA] flex items-center justify-center mb-6 shadow-sm">
                 <ShieldCheck size={32} />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-[#3E2723] mb-4">WHO Standards</h3>
+              <h3 className="text-3xl font-serif font-bold text-[#123C4A] mb-4">Evidence-Based Care</h3>
               <p className="text-[#5D4037] text-lg leading-relaxed mb-8">
-                According to the World Health Organization, mental health is "a state of well-being in which an individual realizes his or her own abilities, can cope with the normal stresses of life, and can work productively.
+                Our workflows follow globally accepted care principles, emphasizing early detection,
+                responsible AI, privacy, and clinician-led decision support.
               </p>
               <Link to="/about" className="text-[#8E24AA] font-bold text-lg flex items-center gap-2 group-hover:gap-3 transition-all">
-                Read Guidelines <ArrowRight size={20} />
+                Learn More <ArrowRight size={20} />
               </Link>
             </div>
           </div>
@@ -404,18 +424,18 @@ export default function Home() {
       </div>
 
       {/* Quote Section */}
-      <div className="bg-[#FFF8E1] py-24 mt-10 relative overflow-hidden">
+      <div className="bg-[#E8F4F3] py-24 mt-10 relative overflow-hidden">
         <div className="absolute top-[-50px] left-[-50px] w-80 h-80 bg-[#FFE0B2] rounded-full opacity-40 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-[-50px] right-[-50px] w-80 h-80 bg-[#FFCC80] rounded-full opacity-30 blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-[-50px] right-[-50px] w-80 h-80 bg-[#B2DFDB] rounded-full opacity-30 blur-3xl animate-pulse delay-1000"></div>
 
         <div className="container mx-auto px-4 text-center relative z-10">
-          <Heart className="w-16 h-16 text-[#FF7043] mx-auto mb-8 animate-bounce" />
-          <h2 className="text-4xl md:text-6xl font-serif font-bold text-[#3E2723] max-w-5xl mx-auto leading-tight italic">
-            "You don't have to control your thoughts. <br /> You just have to stop letting them control you."
+          <Heart className="w-16 h-16 text-[#0F9D8A] mx-auto mb-8 animate-bounce" />
+          <h2 className="text-4xl md:text-6xl font-serif font-bold text-[#123C4A] max-w-5xl mx-auto leading-tight italic transition-all duration-500">
+            "{careQuotes[activeQuoteIndex].text}"
           </h2>
           <div className="mt-10 inline-block">
-            <span className="text-[#5D4037] font-bold tracking-widest uppercase border-b-2 border-[#FF7043] pb-1">
-              Dan Millman
+            <span className="text-[#325A67] font-bold tracking-widest uppercase border-b-2 border-[#0F9D8A] pb-1">
+              {careQuotes[activeQuoteIndex].author}
             </span>
           </div>
         </div>

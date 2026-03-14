@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Droplets, Thermometer, Ghost, Loader2 } from 'lucide-react';
 import axios from 'axios';
-import { BarChart, Bar, RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 // Helper function to get vital status color
 const getVitalColor = (value, normal_min, normal_max) => {
@@ -128,22 +128,34 @@ const DiagnosisCharts = React.memo(({ results, vitals, selectedSymptoms }) => {
   ];
 
   return (
-    <div className="mb-8 space-y-8">
+    <div className="mb-10 space-y-10">
       {/* Vitals Gauges */}
       <div>
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Vital Signs Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h3 className="text-xl font-bold text-gray-800 mb-5">Vital Signs Status</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {vitalGaugeData.map((vital, idx) => (
-            <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2 text-center">{vital.name}</p>
-              <ResponsiveContainer width="100%" height={150}>
-                <RadialBarChart data={[vital]} innerRadius="70%" outerRadius="90%">
-                  <PolarAngleAxis type="number" domain={[0, vital.maxValue]} angleAxisId={0} />
-                  <RadialBar background dataKey="value" cornerRadius={10} angleAxisId={0} />
+            <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 min-h-[255px]">
+              <p className="text-base font-semibold text-gray-700 mb-2 text-center">{vital.name}</p>
+              <ResponsiveContainer width="100%" height={185}>
+                <RadialBarChart
+                  data={[vital]}
+                  startAngle={180}
+                  endAngle={0}
+                  innerRadius="62%"
+                  outerRadius="96%"
+                  cy="88%"
+                >
+                  <PolarAngleAxis
+                    type="number"
+                    domain={[0, vital.maxValue]}
+                    angleAxisId={0}
+                    tick={false}
+                  />
+                  <RadialBar background dataKey="value" cornerRadius={10} angleAxisId={0} clockWise />
                 </RadialBarChart>
               </ResponsiveContainer>
-              <p className="text-center text-lg font-bold text-gray-800">{vital.value} {vital.unit}</p>
-              <p className="text-xs text-center text-gray-500 mt-1">
+              <p className="text-center text-xl font-bold text-gray-800">{vital.value} {vital.unit}</p>
+              <p className="text-sm text-center text-gray-500 mt-1">
                 {vital.value >= vital.normalMin && vital.value <= vital.normalMax ? '✓ Normal' : '✗ Abnormal'}
               </p>
             </div>
@@ -153,20 +165,27 @@ const DiagnosisCharts = React.memo(({ results, vitals, selectedSymptoms }) => {
 
       {/* Risk Score */}
       <div>
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Overall Risk Score</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-5">Overall Risk Score</h3>
         <div className="flex items-center justify-center">
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 w-full md:w-2/3">
-            <ResponsiveContainer width="100%" height={250}>
-              <RadialBarChart data={riskData} innerRadius="60%" outerRadius="85%">
-                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} />
-                <RadialBar background dataKey="value" cornerRadius={15} angleAxisId={0} />
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-10 w-full md:w-3/4">
+            <ResponsiveContainer width="100%" height={330}>
+              <RadialBarChart
+                data={riskData}
+                startAngle={180}
+                endAngle={0}
+                innerRadius="58%"
+                outerRadius="92%"
+                cy="86%"
+              >
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar background dataKey="value" cornerRadius={15} angleAxisId={0} clockWise />
               </RadialBarChart>
             </ResponsiveContainer>
             <div className="text-center">
-              <p className="text-4xl font-bold" style={{ color: riskData[0].fill }}>
+              <p className="text-5xl font-bold" style={{ color: riskData[0].fill }}>
                 {riskScore}%
               </p>
-              <p className="text-gray-700 font-semibold mt-2">
+              <p className="text-gray-700 font-semibold mt-2 text-lg">
                 {riskScore > 70 ? 'High Risk' : riskScore > 40 ? 'Moderate Risk' : 'Low Risk'}
               </p>
             </div>
@@ -177,17 +196,17 @@ const DiagnosisCharts = React.memo(({ results, vitals, selectedSymptoms }) => {
       {/* Conditions Probability */}
       {conditions.length > 0 && (
         <div>
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Possible Conditions</h3>
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
-            <ResponsiveContainer width="100%" height={300}>
+          <h3 className="text-xl font-bold text-gray-800 mb-5">Possible Conditions</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
+            <ResponsiveContainer width="100%" height={340}>
               <BarChart
                 data={conditions}
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 200, bottom: 5 }}
+                margin={{ top: 5, right: 20, left: 120, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 100]} />
-                <YAxis dataKey="name" type="category" width={190} />
+                <YAxis dataKey="name" type="category" width={110} />
                 <Tooltip />
                 <Bar dataKey="probability" fill="#a855f7" radius={8} />
               </BarChart>
@@ -217,7 +236,9 @@ export default function DiagnosisPage() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [appointmentDate, setAppointmentDate] = useState('');
-  const [appointmentTime, setAppointmentTime] = useState('');
+  const [appointmentHour, setAppointmentHour] = useState('');
+  const [appointmentMinute, setAppointmentMinute] = useState('');
+  const [appointmentPeriod, setAppointmentPeriod] = useState('AM');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [patientName, setPatientName] = useState('');
@@ -311,7 +332,7 @@ export default function DiagnosisPage() {
   };
 
   const handleBookAppointment = async () => {
-    if (!selectedDoctor || !appointmentDate || !appointmentTime) {
+    if (!selectedDoctor || !appointmentDate || !appointmentHour || !appointmentMinute || !appointmentPeriod) {
       alert('Please select a doctor, date, and time');
       return;
     }
@@ -324,23 +345,26 @@ export default function DiagnosisPage() {
     try {
       setBookingLoading(true);
       const riskScore = calculateRiskScore(vitals, selectedSymptoms);
+      const formattedAppointmentTime = `${appointmentHour}:${appointmentMinute} ${appointmentPeriod}`;
       
       await axios.post('/api/appointments/book', {
         patientName: patientName.trim(),
         doctorName: selectedDoctor.name,
         specialty: selectedDoctor.specialty,
         date: appointmentDate,
-        time: appointmentTime,
+        time: formattedAppointmentTime,
         patientSymptoms: selectedSymptoms,
         riskScore: riskScore,
         diagnosis: results?.analysis || ''
       }, { withCredentials: true });
 
-      setSuccessMessage(`Appointment booked with ${selectedDoctor.name} on ${appointmentDate} at ${appointmentTime}`);
+      setSuccessMessage(`Appointment booked with ${selectedDoctor.name} on ${appointmentDate} at ${formattedAppointmentTime}`);
       setShowAppointmentModal(false);
       setSelectedDoctor(null);
       setAppointmentDate('');
-      setAppointmentTime('');
+      setAppointmentHour('');
+      setAppointmentMinute('');
+      setAppointmentPeriod('AM');
       setPatientName('');
 
       // Show success message for 3 seconds
@@ -512,8 +536,8 @@ export default function DiagnosisPage() {
 
         {/* Results Section */}
         {results && (
-          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-300 animate-in fade-in">
-            <h2 className="text-2xl font-bold text-green-700 mb-6 flex items-center gap-2">
+          <div className="bg-white rounded-3xl p-7 md:p-10 shadow-xl border-2 border-green-300 animate-in fade-in">
+            <h2 className="text-3xl font-bold text-green-700 mb-7 flex items-center gap-2">
               ✅ AI Diagnosis Results
             </h2>
 
@@ -548,7 +572,9 @@ export default function DiagnosisPage() {
                   setShowAppointmentModal(true);
                   setSelectedDoctor(null);
                   setAppointmentDate('');
-                  setAppointmentTime('');
+                  setAppointmentHour('');
+                  setAppointmentMinute('');
+                  setAppointmentPeriod('AM');
                   setPatientName('');
                 }}
                 className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2 transform hover:scale-105"
@@ -636,12 +662,38 @@ export default function DiagnosisPage() {
               {/* Time Picker */}
               <div className="mb-6">
                 <label className="block text-gray-700 font-semibold mb-3">Appointment Time *</label>
-                <input
-                  type="time"
-                  value={appointmentTime}
-                  onChange={(e) => setAppointmentTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-gray-900"
-                />
+                <div className="grid grid-cols-3 gap-3">
+                  <select
+                    value={appointmentHour}
+                    onChange={(e) => setAppointmentHour(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-gray-900"
+                  >
+                    <option value="">Hour</option>
+                    {['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={appointmentMinute}
+                    onChange={(e) => setAppointmentMinute(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-gray-900"
+                  >
+                    <option value="">Minute</option>
+                    {['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={appointmentPeriod}
+                    onChange={(e) => setAppointmentPeriod(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-gray-900"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
 
               {/* Confirm Button */}
@@ -654,7 +706,7 @@ export default function DiagnosisPage() {
                 </button>
                 <button
                   onClick={handleBookAppointment}
-                  disabled={!selectedDoctor || !appointmentDate || !appointmentTime || bookingLoading}
+                  disabled={!selectedDoctor || !appointmentDate || !appointmentHour || !appointmentMinute || !appointmentPeriod || bookingLoading}
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
                 >
                   {bookingLoading ? (

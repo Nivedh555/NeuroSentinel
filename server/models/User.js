@@ -134,6 +134,10 @@ const userSchema = new mongoose.Schema(
       type:Number, 
       default: 0
     },
+    pushSubscription: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
   });
 
 export default mongoose.model("User", userSchema);
