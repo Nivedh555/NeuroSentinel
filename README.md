@@ -54,6 +54,91 @@ NeuroSentinel combines real-time AI assessment, adaptive check-ins, and automate
 - Hate speech moderation for community safety.
 - Helpline access for immediate support resources.
 
+## Overall Project Working
+
+NeuroSentinel runs as a connected three-service system where each layer has a clear responsibility:
+
+1. Client app (React): handles patient and admin interfaces, data entry, journaling, quiz experience, dashboards, and notifications.
+2. API server (Node/Express): handles authentication, role-based access, business workflows, persistence, encryption, and integration with messaging services.
+3. AI service (Python): handles NLP inference, moderation, risk scoring, and model-based predictions.
+
+### End-to-End Workflow
+
+1. User signs in and enters health data (symptoms, vitals, quiz responses, journal/chat text).
+2. Client sends requests to the Node API.
+3. Node API validates/authenticates data and stores records in MongoDB.
+4. Node API forwards relevant text/feature payloads to the Python AI service.
+5. Python service returns sentiment, toxicity, diagnosis, and risk-related outputs.
+6. Node API combines AI outputs with user history and risk rules.
+7. Client displays insights, recommendations, trend visuals, and escalation warnings.
+8. If risk is critical, the platform triggers emergency notification and supports immediate follow-up actions such as appointment booking.
+
+### Data and Control Flow Summary
+- Input layer: diagnosis forms, adaptive quizzes, journaling, chatbot, and optional camera-based emotion assist.
+- Intelligence layer: DistilBERT/Toxic-BERT/XGBoost pipelines produce explainable risk and moderation signals.
+- Action layer: triage flags, reminders, notifications, and appointment workflow close the detection-to-action loop.
+
+### Architecture Diagram
+
+```mermaid
+flowchart LR
+    U[Patient/Admin User] --> C[Client App<br/>React + Vite]
+    C --> N[Node API Server<br/>Express + MongoDB]
+    N --> P[Python AI Service<br/>NLP + Risk Models]
+    P --> N
+    N --> C
+
+    C --> I[Insights Dashboard]
+    C --> A[Appointment Booking]
+
+    N --> R[Risk Engine + Rules]
+    R --> E[Escalation Manager]
+    E --> T[Twilio Emergency SMS]
+    E --> W[Web Push Reminders]
+
+    J[Journal + Chat + Quizzes + Diagnosis] --> C
+```
+
+## Mental Health Features
+
+NeuroSentinel is designed to continuously monitor mental well-being, not only one-time symptom snapshots.
+
+### Mental Health Assessment
+- Adaptive mental health quizzes for stress, anxiety, depression, sleep quality, and daily check-in state.
+- Risk trend tracking across repeated assessments to detect deterioration early.
+- Explainable outputs so users and providers can understand key risk drivers.
+
+### Emotional and Behavioral Signals
+- Guided journaling with sentiment analysis for emotional state monitoring.
+- Chatbot interaction analysis to detect distress signals in conversational text.
+- Optional facial emotion estimation (with consent) to compare visible affect with written sentiment.
+
+### Safety and Intervention Support
+- High-risk escalation workflow with emergency contact notification.
+- Helpline and crisis-support access for immediate assistance.
+- Provider/admin visibility into risk levels for faster triage and care continuity.
+
+### Care Continuity
+- Direct transition from AI assessment to appointment booking.
+- Risk-aware history available to support follow-up and longitudinal mental health care.
+
+### Mental Health Workflow Diagram
+
+```mermaid
+flowchart TD
+    A[User Daily Check-In] --> B[Adaptive Mental Health Quizzes]
+    A --> C[Journal and Chat Inputs]
+    B --> D[Risk and Sentiment Analysis]
+    C --> D
+    D --> E{Risk Level}
+    E -->|Low to Moderate| F[Self-Care Guidance and Trend Tracking]
+    E -->|High| G[Escalation Alert and Helpline Prompt]
+    G --> H[Emergency Contact Notification]
+    G --> I[Priority Appointment Booking]
+    F --> J[Continuous Monitoring]
+    I --> J
+```
+
 ## System Architecture
 
 ### Frontend
