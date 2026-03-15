@@ -4,7 +4,9 @@ import {
   getAppointments,
   getUserAppointments,
   updateAppointmentStatus,
-  cancelAppointment
+  cancelAppointment,
+  deleteAppointmentAdmin,
+  bulkDeleteOldAppointmentsAdmin
 } from '../controllers/appointmentController.js';
 import userAuth from '../middleware/authmiddleware.js';
 
@@ -24,5 +26,11 @@ router.patch('/:appointmentId/status', userAuth, updateAppointmentStatus);
 
 // Cancel an appointment (requires auth)
 router.delete('/:appointmentId', userAuth, cancelAppointment);
+
+// Admin bulk cleanup for old completed/cancelled records
+router.delete('/admin/cleanup', userAuth, bulkDeleteOldAppointmentsAdmin);
+
+// Admin hard delete for old/incorrect records
+router.delete('/admin/:appointmentId', userAuth, deleteAppointmentAdmin);
 
 export default router;

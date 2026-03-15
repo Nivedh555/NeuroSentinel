@@ -16,6 +16,7 @@ const userAuth = async(req, res, next) => {
         if(decoded.id){
             req.userId = decoded.id;
             req.user = { id: decoded.id };
+            req.isAdmin = decoded.admin === true;
         }else{
             if(req.path == '/is-authenticated'){
                 return next();

@@ -161,6 +161,36 @@ const login = async (req, res) => {
     }
 }
 
+const doctorLogin = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const expectedUsername = process.env.DOCTOR_ADMIN_USERNAME || 'admin';
+        const expectedPassword = process.env.DOCTOR_ADMIN_PASSWORD || 'NeuroAdmin2026';
+
+        if (username !== expectedUsername || password !== expectedPassword) {
+            return res.status(401).json({ message: 'Invalid doctor admin credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: 'doctor-admin', admin: true },
+            process.env.JWT_SECRET,
+            { expiresIn: '12h' }
+        );
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV == 'production',
+            sameSite: process.env.NODE_ENV == 'production' ? 'none' : 'strict',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+
+        return res.json({ message: 'Doctor admin login successful' });
+    } catch (error) {
+        console.error('Error during doctor admin login', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+
 const logout = async (req, res) => {
     try {
         // Clear user cache on logout
@@ -441,4 +471,4 @@ const resetPassword = async (req, res) => {
     }
 }
 
-export { register, logout, login, isAuthenticated, updateProfile, sendOtp, verifyOtp, sendPasswordResetOtp, resetPassword };
+export { register, logout, login, doctorLogin, isAuthenticated, updateProfile, sendOtp, verifyOtp, sendPasswordResetOtp, resetPassword };

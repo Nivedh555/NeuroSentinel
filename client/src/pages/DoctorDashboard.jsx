@@ -7,6 +7,7 @@ export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [stats, setStats] = useState({
     totalToday: 0,
     emergencies: 0,
@@ -26,10 +27,17 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     fetchAppointments();
+
+    const intervalId = setInterval(() => {
+      fetchAppointments();
+    }, 10000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const fetchAppointments = async () => {
     try {
+      setLoadError('');
       const response = await axios.get('/api/appointments/list', {
         withCredentials: true
       });
@@ -67,6 +75,14 @@ export default function DoctorDashboard() {
       });
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        setLoadError('Doctor session expired or unauthorized. Please login again.');
+        sessionStorage.removeItem('adminLoggedIn');
+        navigate('/doctor-login');
+        return;
+      }
+      setLoadError(error?.response?.data?.message || 'Failed to load appointments. Please refresh.');
     }
   };
 
@@ -108,6 +124,37 @@ export default function DoctorDashboard() {
     }
   };
 
+  const deleteAppointment = async (appointmentId) => {
+    const ok = window.confirm('Delete this appointment record permanently? This cannot be undone.');
+    if (!ok) return;
+
+    try {
+      await axios.delete(`/api/appointments/admin/${appointmentId}`, { withCredentials: true });
+      setSelectedAppointment(null);
+      fetchAppointments();
+    } catch (error) {
+      console.error('Failed to delete appointment:', error);
+      alert(error?.response?.data?.message || 'Failed to delete appointment');
+    }
+  };
+
+  const cleanupOldRecords = async () => {
+    const ok = window.confirm('Delete Completed/Cancelled records older than 30 days?');
+    if (!ok) return;
+
+    try {
+      const response = await axios.delete('/api/appointments/admin/cleanup', {
+        withCredentials: true,
+        data: { days: 30 }
+      });
+      alert(response?.data?.message || 'Cleanup completed');
+      fetchAppointments();
+    } catch (error) {
+      console.error('Failed to cleanup appointments:', error);
+      alert(error?.response?.data?.message || 'Failed to cleanup old records');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-white py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -119,16 +166,35 @@ export default function DoctorDashboard() {
             </div>
             <p className="text-gray-600">Manage patient appointments and triage cases</p>
           </div>
-          <button
-            onClick={() => {
-              sessionStorage.removeItem('adminLoggedIn');
-              navigate('/doctor-login');
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-purple-300 bg-white/80 px-5 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
-          >
-            🚪 Logout
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={fetchAppointments}
+              className="inline-flex items-center gap-2 rounded-full border border-blue-300 bg-white/80 px-5 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            >
+              🔄 Refresh
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await axios.post('/api/auth/logout', {}, { withCredentials: true });
+                } catch (error) {
+                  console.error('Logout request failed:', error);
+                }
+                sessionStorage.removeItem('adminLoggedIn');
+                navigate('/doctor-login');
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-purple-300 bg-white/80 px-5 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
+            >
+              🚪 Logout
+            </button>
+          </div>
         </div>
+
+        {loadError && (
+          <div className="mb-6 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {loadError}
+          </div>
+        )}
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -208,6 +274,12 @@ export default function DoctorDashboard() {
           <p className="text-sm text-blue-800">Highest current doctor load: <span className="font-semibold">{stats.topLoadedDoctor}</span></p>
           <p className="text-sm text-blue-800">Suggested next allocation: <span className="font-semibold">{stats.recommendedDoctor}</span></p>
           <p className="text-xs text-blue-700 mt-1">Queue is auto-prioritized by triage level and waiting order.</p>
+          <button
+            onClick={cleanupOldRecords}
+            className="mt-3 inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-100 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-200"
+          >
+            🧹 Cleanup Old Records
+          </button>
         </div>
 
         {/* Patient Queue Table */}
@@ -340,6 +412,12 @@ export default function DoctorDashboard() {
                     {status}
                   </button>
                 ))}
+                <button
+                  onClick={() => deleteAppointment(selectedAppointment._id)}
+                  className="w-full mt-3 px-4 py-2 rounded-lg font-semibold transition bg-red-100 text-red-700 hover:bg-red-200"
+                >
+                  🗑️ Delete Record
+                </button>
               </div>
             </div>
           </div>

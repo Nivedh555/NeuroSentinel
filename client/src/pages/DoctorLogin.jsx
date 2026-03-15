@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function DoctorLogin() {
   const [username, setUsername] = useState('');
@@ -7,19 +8,24 @@ export default function DoctorLogin() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
     setError('');
 
-    if (username === 'admin' && password === 'NeuroAdmin2026') {
+    try {
+      await axios.post('/api/auth/doctor-login', {
+        username,
+        password
+      }, { withCredentials: true });
+
       sessionStorage.setItem('adminLoggedIn', 'true');
       localStorage.setItem('appRole', 'admin');
       localStorage.setItem('roleChoiceDone', 'true');
       navigate('/doctor-dashboard');
       return;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid credentials. Access denied.');
     }
-
-    setError('Invalid credentials. Access denied.');
   };
 
   return (
