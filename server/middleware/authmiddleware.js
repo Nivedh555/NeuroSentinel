@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 const userAuth = async(req, res, next) => {
     const {token} = req.cookies;
     if(!token){
-        if(req.path == '/is-authenticated'){ //status check route so no token required
+        if(req.path === '/is-authenticated'){ //status check route so no token required
             return next();
         }
         return res.status(401).json({
@@ -17,8 +17,9 @@ const userAuth = async(req, res, next) => {
             req.userId = decoded.id;
             req.user = { id: decoded.id };
             req.isAdmin = decoded.admin === true;
+            return next();
         }else{
-            if(req.path == '/is-authenticated'){
+            if(req.path === '/is-authenticated'){
                 return next();
             }
             return res.status(401).json({
@@ -26,16 +27,14 @@ const userAuth = async(req, res, next) => {
             });
         }
     }catch(error){
-        if(req.path == '/is-authenticated'){
+        if(req.path === '/is-authenticated'){
             return next();
         }
         console.log("JWT ERROR:", error.message);
-        res.status(401).json({
+        return res.status(401).json({
             message: "Unauthorized : Invalid token"
         });
     }
-    next();
-
 }
 
 export default userAuth;

@@ -63,6 +63,8 @@ const Signup = () => {
 
       toast.success("Signup successful!");
       await getAuthStatus();
+      localStorage.setItem('appRole', 'user');
+      localStorage.setItem('roleChoiceDone', 'true');
       navigate('/survey');
     }catch(error){
       const errorMessage = error.response?.data?.message || 'An error occurred';

@@ -67,7 +67,7 @@ const register = async (req, res) => {
         
         // Send welcome email but don't block registration if it fails
         try {
-            transporter.sendMail(mailOptions);
+            await transporter.sendMail(mailOptions);
         } catch (emailError) {
             console.error("Warning: Error sending welcome email", emailError);
             // Continue with registration even if email fails
