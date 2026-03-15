@@ -33,6 +33,8 @@ import NotFound from './pages/NotFound';
 import RateLimited from './pages/RateLimited';
 import Survey from './pages/Survey';
 import NavigationSetter from './components/NavigationSetter';
+import LanguageSelectionModal from './components/LanguageSelectionModal';
+import GlobalLanguageApplier from './components/GlobalLanguageApplier';
 
 function App() {
   console.log("[App] Rendering. Time:", new Date().toLocaleTimeString());
@@ -41,6 +43,8 @@ function App() {
   return (
     <Router>
       <NavigationSetter />
+      <LanguageSelectionModal />
+      <GlobalLanguageApplier />
       <Routes>
 
         <Route element={<UserOnlyRoute><AuthLayout><Login /></AuthLayout></UserOnlyRoute>} path="/login" />

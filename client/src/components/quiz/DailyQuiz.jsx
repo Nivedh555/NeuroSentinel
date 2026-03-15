@@ -2,8 +2,13 @@
 import React, { useState, useEffect } from "react";
 import dailyQuizData from "./dailyCheckinQuiz.json";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { Mic, MicOff } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { useSpeechToText } from "../../hooks/useSpeechToText";
 
 const DailyQuiz = ({ userId }) => {
+  const { t, speechLocale } = useLanguage();
   const [quizData, setQuizData] = useState(dailyQuizData);
   const [answers, setAnswers] = useState({});
   const [finalScore, setFinalScore] = useState(null);
@@ -14,6 +19,38 @@ const DailyQuiz = ({ userId }) => {
   const [shakeError, setShakeError] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const { isSupported, isListening, start, stop } = useSpeechToText({
+    lang: speechLocale,
+    onResult: (transcript) => {
+      const current = quizData.questions[currentQuestion];
+      if (!current || current.type !== "paragraph") return;
+      setAnswers((prev) => {
+        const existing = prev[current.id] || "";
+        const spacer = existing.trim() ? " " : "";
+        return { ...prev, [current.id]: `${existing}${spacer}${transcript}` };
+      });
+    },
+    onError: (errorCode) => {
+      if (errorCode === "not-allowed") {
+        toast.error(t("voice.permissionDenied"));
+      } else if (errorCode === "unsupported") {
+        toast.error(t("voice.unsupported"));
+      }
+    },
+  });
+
+  const toggleVoiceInput = () => {
+    if (!isSupported) {
+      toast.error(t("voice.unsupported"));
+      return;
+    }
+    if (isListening) {
+      stop();
+      return;
+    }
+    start();
+  };
 
   // Fetch adaptive quiz on mount
   useEffect(() => {
@@ -151,7 +188,7 @@ const DailyQuiz = ({ userId }) => {
       <div className="min-h-screen flex items-center justify-center bg-[#F3E5F5]">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-[#6A1B9A] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-[#3E2723] font-serif text-lg">Preparing your personalised check-in...</p>
+          <p className="text-[#3E2723] font-serif text-lg">{t("daily.preparing")}</p>
         </div>
       </div>
     );
@@ -191,10 +228,10 @@ const DailyQuiz = ({ userId }) => {
 
               <div className="space-y-4">
                 <h2 className="text-5xl md:text-6xl font-serif text-[#3E2723]">
-                  Wonderful!
+                  {t("daily.wonderful")}
                 </h2>
                 <p className="text-xl text-[#5D4037] max-w-md mx-auto font-medium">
-                  Your daily wellness check-in has been recorded
+                  {t("daily.recorded")}
                 </p>
               </div>
 
@@ -242,8 +279,8 @@ const DailyQuiz = ({ userId }) => {
             <div className="absolute inset-0 rounded-full border-4 border-[#6A1B9A] border-t-transparent animate-spin"></div>
           </div>
           <div className="space-y-2">
-            <p className="text-[#3E2723] font-serif text-xl font-bold">Submitting your check-in...</p>
-            <p className="text-[#5D4037] text-sm font-medium opacity-70">Analysing your wellness responses 🌿</p>
+            <p className="text-[#3E2723] font-serif text-xl font-bold">{t("daily.submitting")}</p>
+            <p className="text-[#5D4037] text-sm font-medium opacity-70">{t("daily.analyzing")} 🌿</p>
           </div>
         </div>
       </div>
@@ -268,12 +305,12 @@ const DailyQuiz = ({ userId }) => {
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-2xl">🌱</span>
               <h1 className="text-3xl md:text-4xl font-serif text-[#3E2723] font-bold">
-                Daily Check-in
+                {t("daily.title")}
               </h1>
               <span className="text-2xl">🌿</span>
             </div>
             <p className="text-[#5D4037] text-sm md:text-base font-medium opacity-70">
-              Your personal wellness reflection
+              {t("daily.subtitle")}
             </p>
             {adaptations && (() => {
               const categoryMeta = {
@@ -304,10 +341,10 @@ const DailyQuiz = ({ userId }) => {
           <div className="mb-6 bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-white/60">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-bold text-[#3E2723]">
-                Question {currentQuestion + 1} of {quizData.questions.length}
+                {t("daily.questionOf", { current: currentQuestion + 1, total: quizData.questions.length })}
               </span>
               <span className="text-xs font-bold text-[#6A1B9A]">
-                {Math.round(progress)}% Complete
+                {t("daily.complete", { percent: Math.round(progress) })}
               </span>
             </div>
             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -460,17 +497,28 @@ const DailyQuiz = ({ userId }) => {
 
               {q.type === "paragraph" && (
                 <div className="relative">
+                  <div className="flex justify-end mb-2">
+                    <button
+                      type="button"
+                      onClick={toggleVoiceInput}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${isListening ? "bg-red-50 border-red-300 text-red-700" : "bg-emerald-50 border-emerald-300 text-emerald-700"}`}
+                      title={isListening ? t("voice.stop") : t("voice.start")}
+                    >
+                      {isListening ? <MicOff size={14} className="inline mr-1" /> : <Mic size={14} className="inline mr-1" />}
+                      {isListening ? t("voice.stop") : t("voice.start")}
+                    </button>
+                  </div>
                   <textarea
                     value={answers[q.id] || ""}
                     onChange={(e) =>
                       handleChange(q.id, e.target.value, "paragraph")
                     }
-                    placeholder="Take your time to reflect and share your thoughts..."
+                    placeholder={t("daily.reflectionPlaceholder")}
                     className="w-full p-4 bg-white/70 border-2 border-purple-100 rounded-xl focus:border-[#6A1B9A] focus:ring-4 focus:ring-purple-100 outline-none transition-all resize-none text-[#3E2723] placeholder-[#5D4037]/40 text-sm md:text-base leading-relaxed shadow-inner font-medium"
                     rows={5}
                   />
                   <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-white/80 backdrop-blur-sm rounded-full text-xs text-[#5D4037] border border-purple-100 font-bold">
-                    {answers[q.id]?.length || 0} characters
+                    {t("daily.characters", { count: answers[q.id]?.length || 0 })}
                   </div>
                 </div>
               )}
@@ -483,8 +531,8 @@ const DailyQuiz = ({ userId }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z" />
                 </svg>
                 {q.type === "paragraph"
-                  ? "Please write your reflection before continuing"
-                  : "Please select an option before continuing"}
+                  ? t("daily.validationParagraph")
+                  : t("daily.validationChoice")}
               </div>
             )}
 
@@ -510,7 +558,7 @@ const DailyQuiz = ({ userId }) => {
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                Previous
+                {t("daily.previous")}
               </button>
 
               {currentQuestion < quizData.questions.length - 1 ? (
@@ -532,7 +580,7 @@ const DailyQuiz = ({ userId }) => {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  Next
+                  {t("daily.next")}
                   <svg
                     className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
                     fill="none"
@@ -557,7 +605,7 @@ const DailyQuiz = ({ userId }) => {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  <span>Submit Check-in</span>
+                  <span>{t("daily.submit")}</span>
                   <svg
                     className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
                     fill="none"

@@ -7,11 +7,13 @@ import Underline from '@tiptap/extension-underline';
 import {
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered,
   ChevronLeft, ChevronRight, BookOpen, PenLine, Trash2, Save,
-  Undo, Redo, Lock, Feather, Heart, Sparkles, Pencil, Moon, CalendarDays, Star, BookMarked
+  Undo, Redo, Lock, Feather, Heart, Sparkles, Pencil, Moon, CalendarDays, Star, BookMarked, Mic, MicOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import EmotionDetector from '../components/EmotionDetector';
 import MoodMismatchBanner from '../components/MoodMismatchBanner';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { useSpeechToText } from '../hooks/useSpeechToText';
 import { getMoodMismatchMessage } from '../utils/emotionUtils';
 import {
   fetchJournalEntries,
@@ -115,6 +117,7 @@ const BindingDots = () => (
 );
 
 export default function Journal() {
+  const { t, speechLocale } = useLanguage();
   const [mode, setMode] = useState('write');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const faceEmotionRef = useRef('neutral');
@@ -357,6 +360,34 @@ export default function Journal() {
     return hasEntry ? 'calendar-has-entry' : '';
   };
 
+  const { isSupported, isListening, start, stop } = useSpeechToText({
+    lang: speechLocale,
+    onResult: (transcript) => {
+      if (!isToday || !editor) return;
+      editor.chain().focus().insertContent(`${transcript} `).run();
+      toast.success(t('voice.listening'));
+    },
+    onError: (errorCode) => {
+      if (errorCode === 'not-allowed') {
+        toast.error(t('voice.permissionDenied'));
+      } else if (errorCode === 'unsupported') {
+        toast.error(t('voice.unsupported'));
+      }
+    },
+  });
+
+  const toggleVoiceInput = () => {
+    if (!isSupported) {
+      toast.error(t('voice.unsupported'));
+      return;
+    }
+    if (isListening) {
+      stop();
+      return;
+    }
+    start();
+  };
+
   return (
     <div className="journal-page">
       <MoodMismatchBanner message={mismatchMessage} onDismiss={() => setMismatchMessage(null)} />
@@ -367,11 +398,11 @@ export default function Journal() {
           <div>
             <h1 className="text-3xl text-[#4a5568] flex items-center gap-3" style={{ fontFamily: "'Quicksand', sans-serif", fontWeight: 700 }}>
               <Feather className="text-[#8fb5a3]" size={24} />
-              My Diary
+              {t('journal.title')}
               <Heart className="text-[#8fb5a3] fill-[#8fb5a3] opacity-40" size={16} />
             </h1>
             <p className="text-sm text-[#7c8a7e] mt-1" style={{ fontFamily: "'Quicksand', sans-serif" }}>
-              your cozy corner to pour your thoughts out
+              {t('journal.subtitle')}
             </p>
           </div>
 
@@ -382,14 +413,14 @@ export default function Journal() {
               onClick={() => setMode('write')}
             >
               <PenLine size={13} className="inline mr-1 -mt-0.5" />
-              Write
+              {t('journal.write')}
             </button>
             <button
               className={`journal-mode-tab ${mode === 'read' ? 'active' : ''}`}
               onClick={() => setMode('read')}
             >
               <BookOpen size={13} className="inline mr-1 -mt-0.5" />
-              Read
+              {t('journal.read')}
             </button>
           </div>
         </div>
@@ -397,7 +428,7 @@ export default function Journal() {
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
           {/* ── Left: Calendar ── */}
           <div className="journal-calendar-panel h-fit lg:sticky lg:top-24">
-            <h3><CalendarDays size={14} className="inline -mt-0.5 mr-1 text-[#8fb5a3]" /> Calendar</h3>
+            <h3><CalendarDays size={14} className="inline -mt-0.5 mr-1 text-[#8fb5a3]" /> {t('journal.calendar')}</h3>
             <Calendar
               value={selectedDate}
               onChange={handleDateClick}
@@ -410,7 +441,7 @@ export default function Journal() {
             <div className="mt-4 pt-3 border-t" style={{ borderColor: 'rgba(190, 180, 160, 0.2)' }}>
               <p className="text-xs flex items-center gap-1.5" style={{ color: '#7c8a7e', fontFamily: "'Quicksand', sans-serif" }}>
                 <span style={{ color: '#8fb5a3', fontSize: '10px' }}>●</span>
-                Days with entries
+                {t('journal.daysWithEntries')}
               </p>
             </div>
           </div>
@@ -439,14 +470,14 @@ export default function Journal() {
                     )}
                     {isPastDay && existingEntry && (
                       <span className="diary-status-tag readonly">
-                        <Lock size={10} /> Read only
+                        <Lock size={10} /> {t('journal.readOnly')}
                       </span>
                     )}
                   </div>
                   <input
                     type="text"
                     className="diary-subject-input"
-                    placeholder={isPastDay ? '' : "Give it a title..."}
+                    placeholder={isPastDay ? '' : t('journal.titlePlaceholder')}
                     value={subject}
                     onChange={(e) => !isPastDay && setSubject(e.target.value)}
                     readOnly={isPastDay}
@@ -457,7 +488,7 @@ export default function Journal() {
                 {isPastDay && existingEntry && (
                   <div className="diary-readonly-notice">
                     <Lock size={13} />
-                    This is a past entry — it's sealed in time, no edits allowed
+                    {t('journal.pastEntryNotice')}
                   </div>
                 )}
 
@@ -465,6 +496,15 @@ export default function Journal() {
                 {isToday && (
                   <div className="flex items-center justify-between px-4 pt-3 pb-0" style={{ paddingLeft: '2.75rem' }}>
                     <DiaryToolbar editor={editor} />
+                    <button
+                      type="button"
+                      onClick={toggleVoiceInput}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${isListening ? 'bg-red-50 border-red-300 text-red-700' : 'bg-emerald-50 border-emerald-300 text-emerald-700'}`}
+                      title={isListening ? t('voice.stop') : t('voice.start')}
+                    >
+                      {isListening ? <MicOff size={14} className="inline mr-1" /> : <Mic size={14} className="inline mr-1" />}
+                      {isListening ? t('voice.stop') : t('voice.start')}
+                    </button>
                   </div>
                 )}
 
@@ -495,7 +535,7 @@ export default function Journal() {
                         disabled={saving}
                       >
                         <Save size={14} className="inline mr-1.5 -mt-0.5" />
-                        {saving ? 'Saving...' : existingEntry ? 'Update' : 'Save'}
+                        {saving ? t('journal.saving') : existingEntry ? t('journal.update') : t('journal.save')}
                       </button>
                       {existingEntry && (
                         <button
@@ -503,7 +543,7 @@ export default function Journal() {
                           onClick={handleDelete}
                         >
                           <Trash2 size={13} className="inline mr-1 -mt-0.5" />
-                          Delete
+                          {t('journal.delete')}
                         </button>
                       )}
                     </div>

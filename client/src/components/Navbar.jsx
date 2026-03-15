@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { logoutUser } from '../lib/authapi';
 import { AuthContext } from '../context/AuthContext.jsx';
+import { useLanguage } from '../context/LanguageContext.jsx';
 import { IoMdNotificationsOutline } from "react-icons/io";
 import StreakIndicator from './StreakIndicator';
 import BrandLogo from './BrandLogo';
@@ -11,6 +12,7 @@ const Navbar = () => {
     const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
     const navigate = useNavigate();
     const { user, setUser, setIsLoggedIn, isLoggedIn } = useContext(AuthContext);
+    const { t, language, changeLanguage, languages } = useLanguage();
     const [isScrolled, setIsScrolled] = useState(false);
     const [quizHover, setQuizHover] = useState(false);
     const quizTimeoutRef = useRef(null);
@@ -120,11 +122,11 @@ const Navbar = () => {
     }, []);
 
     const quizLinks = [
-        { to: '/daily-quiz', label: 'Daily Quiz' },
-        { to: '/anxiety-quiz', label: 'Anxiety Quiz' },
-        { to: '/depression-quiz', label: 'Depression Quiz' },
-        { to: '/stress-quiz', label: 'Stress Quiz' },
-        { to: '/sleep-quiz', label: 'Sleep Quiz' },
+        { to: '/daily-quiz', label: t('nav.dailyQuiz') },
+        { to: '/anxiety-quiz', label: t('nav.anxietyQuiz') },
+        { to: '/depression-quiz', label: t('nav.depressionQuiz') },
+        { to: '/stress-quiz', label: t('nav.stressQuiz') },
+        { to: '/sleep-quiz', label: t('nav.sleepQuiz') },
     ];
 
     return (
@@ -147,7 +149,7 @@ const Navbar = () => {
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                         <li>
                             <details>
-                                <summary className="list-none before:hidden after:hidden marker:hidden cursor-pointer">Quiz</summary>
+                                <summary className="list-none before:hidden after:hidden marker:hidden cursor-pointer">{t('nav.quiz')}</summary>
                                 <ul className="p-2 bg-white dark:bg-gray-800 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 min-w-[160px]">
                                     {quizLinks.map(link => (
                                         <li key={link.to}>
@@ -159,13 +161,13 @@ const Navbar = () => {
                                 </ul>
                             </details>
                         </li>
-                        <li><Link to="/journal">Journal</Link></li>
-                        <li><Link to="/diagnosis">Diagnosis</Link></li>
-                        <li><Link to="/insights">Insights</Link></li>
-                        {isAdminRole && <li><Link to="/doctor-dashboard">Doctor Portal</Link></li>}
-                        <li><Link to="/about">About Us</Link></li>
-                        <li><Link to="/chatbot">SyncAI</Link></li>
-                        <li><Link to="/helplines">Helplines</Link></li>
+                        <li><Link to="/journal">{t('nav.journal')}</Link></li>
+                        <li><Link to="/diagnosis">{t('nav.diagnosis')}</Link></li>
+                        <li><Link to="/insights">{t('nav.insights')}</Link></li>
+                        {isAdminRole && <li><Link to="/doctor-dashboard">{t('nav.doctorPortal')}</Link></li>}
+                        <li><Link to="/about">{t('nav.about')}</Link></li>
+                        <li><Link to="/chatbot">{t('nav.chatbot')}</Link></li>
+                        <li><Link to="/helplines">{t('nav.helplines')}</Link></li>
                     </ul>
                 </div>
 
@@ -192,7 +194,7 @@ const Navbar = () => {
                         onMouseLeave={handleQuizLeave}
                     >
                         <span className="cursor-pointer flex items-center gap-1 select-none">
-                            Quiz
+                            {t('nav.quiz')}
                             <ChevronDown
                                 size={14}
                                 className={`transition-transform duration-200 ${quizHover ? 'rotate-180' : ''}`}
@@ -220,18 +222,32 @@ const Navbar = () => {
                         )}
                     </li>
 
-                    <li><Link to="/journal">Journal</Link></li>
-                    <li><Link to="/diagnosis">Diagnosis</Link></li>
-                    <li><Link to="/insights">Insights</Link></li>
-                    {isAdminRole && <li><Link to="/doctor-dashboard">Doctor Portal</Link></li>}
-                    <li><Link to="/about">About Us</Link></li>
-                    <li><Link to="/chatbot">SyncAI</Link></li>
-                    <li><Link to="/helplines">Helplines</Link></li>
+                    <li><Link to="/journal">{t('nav.journal')}</Link></li>
+                    <li><Link to="/diagnosis">{t('nav.diagnosis')}</Link></li>
+                    <li><Link to="/insights">{t('nav.insights')}</Link></li>
+                    {isAdminRole && <li><Link to="/doctor-dashboard">{t('nav.doctorPortal')}</Link></li>}
+                    <li><Link to="/about">{t('nav.about')}</Link></li>
+                    <li><Link to="/chatbot">{t('nav.chatbot')}</Link></li>
+                    <li><Link to="/helplines">{t('nav.helplines')}</Link></li>
                 </ul>
             </div>
 
             {/* RIGHT SIDE */}
             <div className="navbar-end flex items-center gap-3">
+                <label className={`flex items-center gap-2 text-xs font-semibold ${isScrolled ? 'text-gray-700' : 'text-white'}`}>
+                    <span className="hidden md:inline">{t('language.label')}</span>
+                    <select
+                        value={language}
+                        onChange={(e) => changeLanguage(e.target.value)}
+                        className="select select-bordered select-xs bg-white/90 text-gray-800"
+                        aria-label={t('language.label')}
+                    >
+                        {Object.entries(languages).map(([code, config]) => (
+                            <option key={code} value={code}>{config.label}</option>
+                        ))}
+                    </select>
+                </label>
+
                 {isLoggedIn && <StreakIndicator />}
 
                 {isLoggedIn && (

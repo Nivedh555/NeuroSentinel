@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { LanguageProvider } from './context/LanguageContext.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setupAllInterceptors } from './lib/axiosInterceptors';
 import authapi from './lib/authapi';
@@ -17,10 +18,12 @@ import { Toaster } from 'react-hot-toast';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Toaster />
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </React.StrictMode>
 );

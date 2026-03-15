@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, ArrowRight } from 'lucide-react';
 import BrandLogo from './BrandLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 const Footer = () => {
+    const { translatePhrase } = useLanguage();
+
     return (
         <footer className="bg-[#0f0f1a] text-gray-300 border-t border-white/5 font-sans">
             <div className="container mx-auto px-4 py-16">
@@ -14,8 +17,8 @@ const Footer = () => {
                             <BrandLogo size="md" showWordmark={true} />
                         </Link>
                         <p className="text-sm leading-relaxed text-gray-400">
-                            Your connected platform for smarter healthcare. <br />
-                            Screen early, coordinate faster, care better.
+                            {translatePhrase('Your connected platform for smarter healthcare.')} <br />
+                            {translatePhrase('Screen early, coordinate faster, care better.')}
                         </p>
                         <div className="flex gap-4 pt-2">
                             {/* Social Icons */}
@@ -33,34 +36,34 @@ const Footer = () => {
 
                     {/* Quick Links */}
                     <div>
-                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Services</h6>
+                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">{translatePhrase('Services')}</h6>
                         <ul className="space-y-3 text-sm">
-                            <li><Link to="/diagnosis" className="hover:text-bloom-primary transition-colors">AI Symptom Check</Link></li>
-                            <li><Link to="/daily-quiz" className="hover:text-bloom-primary transition-colors">Daily Risk Check</Link></li>
-                            <li><Link to="/insights" className="hover:text-bloom-primary transition-colors">Health Insights</Link></li>
-                            <li><Link to="/chatbot" className="hover:text-bloom-primary transition-colors">Care Assistant</Link></li>
+                            <li><Link to="/diagnosis" className="hover:text-bloom-primary transition-colors">{translatePhrase('AI Symptom Check')}</Link></li>
+                            <li><Link to="/daily-quiz" className="hover:text-bloom-primary transition-colors">{translatePhrase('Daily Risk Check')}</Link></li>
+                            <li><Link to="/insights" className="hover:text-bloom-primary transition-colors">{translatePhrase('Health Insights')}</Link></li>
+                            <li><Link to="/chatbot" className="hover:text-bloom-primary transition-colors">{translatePhrase('Care Assistant')}</Link></li>
                         </ul>
                     </div>
 
                     {/* Company */}
                     <div>
-                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Company</h6>
+                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">{translatePhrase('Company')}</h6>
                         <ul className="space-y-3 text-sm">
-                            <li><Link to="/about" className="hover:text-bloom-primary transition-colors">About Us</Link></li>
-                            <li><Link to="/contact" className="hover:text-bloom-primary transition-colors">Contact</Link></li>
-                            <li><Link to="/privacy" className="hover:text-bloom-primary transition-colors">Privacy Policy</Link></li>
-                            <li><Link to="/terms" className="hover:text-bloom-primary transition-colors">Terms of Service</Link></li>
+                            <li><Link to="/about" className="hover:text-bloom-primary transition-colors">{translatePhrase('About Us')}</Link></li>
+                            <li><Link to="/contact" className="hover:text-bloom-primary transition-colors">{translatePhrase('Contact')}</Link></li>
+                            <li><Link to="/privacy" className="hover:text-bloom-primary transition-colors">{translatePhrase('Privacy Policy')}</Link></li>
+                            <li><Link to="/terms" className="hover:text-bloom-primary transition-colors">{translatePhrase('Terms of Service')}</Link></li>
                         </ul>
                     </div>
 
                     {/* Newsletter */}
                     <div>
-                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Stay Connected</h6>
-                        <p className="text-sm text-gray-400 mb-4">Join our newsletter for healthcare updates and product news.</p>
+                        <h6 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">{translatePhrase('Stay Connected')}</h6>
+                        <p className="text-sm text-gray-400 mb-4">{translatePhrase('Join our newsletter for healthcare updates and product news.')}</p>
                         <div className="relative">
                             <input
                                 type="email"
-                                placeholder="Enter your email"
+                                placeholder={translatePhrase('Enter your email')}
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-bloom-primary/50 focus:ring-1 focus:ring-bloom-primary/50 transition-all placeholder-gray-600"
                             />
                             <button className="absolute right-2 top-2 p-1.5 bg-bloom-primary text-white rounded-lg hover:bg-bloom-primary/80 transition-colors">
@@ -73,9 +76,9 @@ const Footer = () => {
                 <div className="border-t border-white/5 mt-16 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
                     <p>&copy; {new Date().getFullYear()} NeuroSentinel. All rights reserved.</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <Link to="/privacy" className="hover:text-gray-300">Privacy</Link>
-                        <Link to="/terms" className="hover:text-gray-300">Terms</Link>
-                        <Link to="/cookies" className="hover:text-gray-300">Cookies</Link>
+                        <Link to="/privacy" className="hover:text-gray-300">{translatePhrase('Privacy')}</Link>
+                        <Link to="/terms" className="hover:text-gray-300">{translatePhrase('Terms')}</Link>
+                        <Link to="/cookies" className="hover:text-gray-300">{translatePhrase('Cookies')}</Link>
                     </div>
                 </div>
             </div>
